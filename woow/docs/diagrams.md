@@ -1,24 +1,17 @@
 
-# Diagram Gallery (Mermaid)
+# Diagrams
 
-## Big Picture
+## Agent Event Loop
 ```mermaid
-flowchart LR
-  Exchange[(Betfair Exchange)] --> StreamAPI[Stream API]
-  StreamAPI --> Agent[Agent Service]
-  Agent -->|/metrics| Prometheus
-  Prometheus --> Grafana
-  Agent -->|orders| Exchange
-  Agent -->|optional| PredictionAPI
-```
-
-## Data & Decisions
-```mermaid
-flowchart LR
-  Prices[Best back prices] --> MCP
-  Probs[Model probs] --> MCP
-  MCP --> Edge[Edge >= threshold?]
-  Edge -->|Yes| Stake[Kelly-sized stake]
-  Stake --> Order[Place limit order]
-  Edge -->|No| Wait[No bet]
+sequenceDiagram
+  participant Stream as Exchange Stream
+  participant Agent
+  participant MCP
+  participant Exec as Execution
+  Stream->>Agent: Odds update
+  Agent->>MCP: Evaluate (P_A, P_B, O_A, O_B)
+  MCP-->>Agent: rec, edge, stake
+  Agent->>Exec: Place order (if any)
+  Agent-->>Prom: Metrics
+  Agent-->>UI: Events JSONL (via gateway)
 ```
