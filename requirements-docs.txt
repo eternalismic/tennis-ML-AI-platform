@@ -1,0 +1,14 @@
+
+mkdocs
+mkdocs-material
+pymdown-extensions
+mkdocs-jupyter
+jupyter
+nbconvert
+ipykernel
+numpy
+matplotlib
+scipy
+scikit-learn
+pandas
+pillow
