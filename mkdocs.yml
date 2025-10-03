@@ -1,0 +1,57 @@
+
+site_name: Tennis MCP — Docs
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.indexes
+    - content.code.copy
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.arithmatex
+  - pymdownx.snippets
+  - pymdownx.tasklist
+  - pymdownx.mark
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.tilde
+  - pymdownx.critic
+  - pymdownx.emoji
+  - attr_list
+  - tables
+extra_css:
+  - docs/stylesheets/extra.css
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - UI & Gateway: ui.md
+  - MCP & Strategy: mcp.md
+  - ML & Prediction:
+    - ml-basics.md
+    - prediction-modeling.md
+    - calibration-evaluation.md
+  - Validation & Safety:
+    - simulation-validation.md
+    - risk-controls.md
+    - security-auth.md
+  - Runbooks:
+    - runbooks/sim-shadow.md
+    - runbooks/prod-cutover.md
+  - Helm & OpenShift:
+    - helm.md
+    - openshift.md
+  - Diagrams: diagrams.md
+plugins:
+  - search
+  - Publishing Docs: github-pages.md
+  - ML & Prediction:
+  - calibration-demo.md
+  - OpenShift UWM: openshift-uwm.md
