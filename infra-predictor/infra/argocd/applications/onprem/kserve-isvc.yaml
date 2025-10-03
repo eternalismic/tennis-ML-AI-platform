@@ -1,0 +1,11 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: kserve-isvc, namespace: openshift-gitops }
+spec:
+  project: apps
+  destination: { namespace: opendatahub, server: https://kubernetes.default.svc }
+  source:
+    repoURL: '{{ REPO_URL }}'
+    targetRevision: HEAD
+    path: manifests/kserve
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }

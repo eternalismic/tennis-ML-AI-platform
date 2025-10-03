@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: grafana-dashboard-tennis-predictor, namespace: observability, labels: { grafana_dashboard: "1" } }
+data:
+  tennis-predictor.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "panels": [
+        { "type": "graph", "title": "Requests per Endpoint",
+          "targets": [ { "expr": "sum(rate(predict_requests_total[5m])) by (endpoint)", "legendFormat": "{{endpoint}}" } ] },
+        { "type": "heatmap", "title": "Latency p90",
+          "targets": [ { "expr": "histogram_quantile(0.90, sum(rate(predict_latency_seconds_bucket[5m])) by (le,endpoint))" } ] }
+      ],
+      "schemaVersion": 36, "title": "Tennis Predictor", "version": 1
+    }

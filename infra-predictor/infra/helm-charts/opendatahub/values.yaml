@@ -1,0 +1,15 @@
+installOperator: true
+operator:
+  namespace: openshift-operators
+  sourceNamespace: openshift-marketplace
+  source: community-operators
+  channel: stable
+  name: opendatahub-operator
+useDataScienceCluster: true
+dsc:
+  namespace: opendatahub
+  name: default-dsc
+  components:
+    dashboard: Managed
+    workbenches: Managed
+    kserve: Managed

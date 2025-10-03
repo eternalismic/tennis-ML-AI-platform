@@ -1,0 +1,17 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata: { name: mlflow-db, namespace: mlflow }
+spec:
+  instances: 1
+  storage: { size: 10Gi }
+  bootstrap:
+    initdb:
+      database: mlflow
+      owner: mlflow
+      secret: { name: mlflow-db-secret }
+---
+apiVersion: v1
+kind: Secret
+metadata: { name: mlflow-db-secret, namespace: mlflow }
+type: kubernetes.io/basic-auth
+stringData: { username: mlflow, password: mlflowpass }

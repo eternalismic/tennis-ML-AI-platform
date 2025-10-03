@@ -1,0 +1,4 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: airflow-default-deny, namespace: airflow }
+spec: { podSelector: {}, policyTypes: [ Ingress ] }

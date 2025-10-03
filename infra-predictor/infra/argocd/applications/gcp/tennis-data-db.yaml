@@ -1,0 +1,21 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata: { name: tennis-data-db, namespace: data }
+spec:
+  instances: 1
+  storage: { size: 20Gi }
+  bootstrap:
+    initdb:
+      database: tennis
+      owner: tennis
+      secret: { name: tennis-db-secret }
+---
+apiVersion: v1
+kind: Namespace
+metadata: { name: data }
+---
+apiVersion: v1
+kind: Secret
+metadata: { name: tennis-db-secret, namespace: data }
+type: kubernetes.io/basic-auth
+stringData: { username: tennis, password: tennispass }

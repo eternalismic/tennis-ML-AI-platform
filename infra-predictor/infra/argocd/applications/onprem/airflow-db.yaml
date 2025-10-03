@@ -1,0 +1,17 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata: { name: airflow-db, namespace: airflow }
+spec:
+  instances: 1
+  storage: { size: 10Gi }
+  bootstrap:
+    initdb:
+      database: airflow
+      owner: airflow
+      secret: { name: airflow-db-secret }
+---
+apiVersion: v1
+kind: Secret
+metadata: { name: airflow-db-secret, namespace: airflow }
+type: kubernetes.io/basic-auth
+stringData: { username: airflow, password: airflowpass }

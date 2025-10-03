@@ -1,0 +1,202 @@
+# Sealed Secrets
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: sealed-secrets, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: sealed-secrets, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://bitnami-labs.github.io/sealed-secrets
+    chart: sealed-secrets
+    targetRevision: 2.15.x
+    helm: { values: "fullnameOverride: sealed-secrets\n" }
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# CloudNativePG
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: cnpg-operator, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: cnpg-system, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://cloudnative-pg.github.io/charts
+    chart: cloudnative-pg
+    targetRevision: 0.22.x
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# kube-prometheus-stack
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: kube-prometheus-stack, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: observability, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 58.3.0
+    helm:
+      values: |
+        grafana:
+          adminPassword: admin
+          service: { type: ClusterIP }
+          sidecar:
+            dashboards: { enabled: true, searchNamespace: ALL, label: grafana_dashboard }
+        prometheus:
+          prometheusSpec: { serviceMonitorSelectorNilUsesHelmValues: false }
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# cert-manager (optional)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: cert-manager, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: cert-manager, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: v1.15.3
+    helm: { values: "installCRDs: true\n" }
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# external-dns (Google Cloud DNS)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: external-dns, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: external-dns, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://kubernetes-sigs.github.io/external-dns
+    chart: external-dns
+    targetRevision: 1.14.5
+    helm:
+      values: |
+        provider: google
+        domainFilters: []  # e.g. ['example.yourdomain.com']
+        txtOwnerId: odh-gcp
+        policy: upsert-only
+        google:
+          serviceAccountSecret: external-dns-gcp
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# MinIO
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: minio, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: minio, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://charts.min.io/
+    chart: minio
+    targetRevision: 5.0.12
+    helm:
+      values: |
+        mode: standalone
+        rootUser: "minioadmin"
+        rootPassword: "minioadmin123"
+        persistence: { enabled: true, size: 50Gi }
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# MLflow
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: mlflow, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: mlflow, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://community-charts.github.io/helm-charts
+    chart: mlflow
+    targetRevision: 0.7.11
+    helm:
+      values: |
+        backendStore:
+          database:
+            driver: postgresql
+            host: mlflow-db-rw.mlflow.svc
+            port: 5432
+            database: mlflow
+            user: mlflow
+            password: mlflowpass
+        defaultArtifactRoot: s3://mlflow-artifacts
+        extraEnv:
+          - name: AWS_ACCESS_KEY_ID
+            value: minioadmin
+          - name: AWS_SECRET_ACCESS_KEY
+            value: minioadmin123
+          - name: MLFLOW_S3_ENDPOINT_URL
+            value: http://minio.minio.svc:9000
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# Apache Airflow
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: airflow, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: airflow, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://airflow.apache.org
+    chart: airflow
+    targetRevision: 1.13.1
+    helm:
+      values: |
+        defaultAirflowTag: "2.9.3"
+        executor: "KubernetesExecutor"
+        dags:
+          persistence: { enabled: false }
+          gitSync:
+            enabled: true
+            repo: https://github.com/yourorg/tennis-predictor.git
+            branch: main
+            subPath: dags
+            wait: 30
+        postgresql: { enabled: false }
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# Argo Rollouts
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: argo-rollouts, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: argo-rollouts, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-rollouts
+    targetRevision: 2.36.3
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# KServe (upstream Helm) — ensure Knative is available
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: kserve, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: kserve, server: https://kubernetes.default.svc }
+  source:
+    repoURL: https://kserve.github.io/helm-charts
+    chart: kserve
+    targetRevision: 0.13.0
+    helm: { values: "kserve:\n  ingress: istio\n" }
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }
+---
+# Tennis Predictor app
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: tennis-predictor, namespace: openshift-gitops }
+spec:
+  project: apps
+  destination: { namespace: predictor, server: https://kubernetes.default.svc }
+  source:
+    repoURL: '{{ REPO_URL }}'
+    targetRevision: HEAD
+    path: helm-charts/tennis-predictor
+    helm:
+      values: |
+        image: { repository: ghcr.io/yourorg/tennis-predictor, tag: latest }
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }

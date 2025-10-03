@@ -1,0 +1,10 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata: { name: sklearn-elo, namespace: opendatahub }
+spec:
+  predictor:
+    sklearn:
+      storageUri: "s3://mlflow-artifacts/models/tennis-outcome-sklearn/v1/"
+      resources:
+        requests: { cpu: "500m", memory: "512Mi" }
+        limits:   { cpu: "1", memory: "1Gi" }

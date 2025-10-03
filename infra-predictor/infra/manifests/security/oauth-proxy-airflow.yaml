@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata: { name: airflow-proxy, namespace: airflow }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: airflow-oauth-proxy, namespace: airflow }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: airflow-oauth-proxy } }
+  template:
+    metadata: { labels: { app: airflow-oauth-proxy } }
+    spec:
+      serviceAccountName: airflow-proxy
+      containers:
+        - name: oauth-proxy
+          image: quay.io/openshift/origin-oauth-proxy:4.15
+          args:
+            - --provider=openshift
+            - --upstream=http://airflow-web:8080
+            - --http-address=:4180
+            - --cookie-secret=SECRET
+            - --openshift-service-account=airflow-proxy
+            - --skip-provider-button=true
+          ports: [ { containerPort: 4180, name: oauth } ]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: airflow-oauth-proxy, namespace: airflow }
+spec:
+  selector: { app: airflow-oauth-proxy }
+  ports: [ { port: 4180, targetPort: 4180, name: http } ]
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata: { name: airflow, namespace: airflow }
+spec:
+  to: { kind: Service, name: airflow-oauth-proxy }
+  port: { targetPort: http }
+  tls: { termination: edge }

@@ -1,0 +1,9 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: mlflow-allow-predictor, namespace: mlflow }
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: predictor } }
+      ports: [ { protocol: TCP, port: 5000 } ]

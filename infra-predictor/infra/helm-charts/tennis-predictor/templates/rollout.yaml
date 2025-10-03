@@ -1,0 +1,76 @@
+{{- if .Values.rollouts.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata: { name: tennis-predictor, labels: { app: tennis-predictor } }
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector: { matchLabels: { app: tennis-predictor } }
+  strategy:
+    canary:
+      canaryService: tennis-predictor-canary
+      stableService: tennis-predictor
+      steps:
+{{ toYaml .Values.rollouts.canarySteps | indent 8 }}
+      analysis:
+        templates:
+          - templateName: predictor-success-rate
+          - templateName: predictor-error-rate
+        startingStep: 1
+  template:
+    metadata: { labels: { app: tennis-predictor } }
+    spec:
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports: [ { containerPort: {{ .Values.service.port }} } ]
+          env: {{- toYaml .Values.env | nindent 12 }}
+          readinessProbe: { httpGet: { path: /healthz, port: {{ .Values.service.port }} }, initialDelaySeconds: 5, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /healthz, port: {{ .Values.service.port }} }, initialDelaySeconds: 10, periodSeconds: 20 }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: tennis-predictor-canary }
+spec:
+  selector: { app: tennis-predictor }
+  ports: [ { name: http, port: {{ .Values.service.port }}, targetPort: {{ .Values.service.port }} } ]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata: { name: predictor-success-rate }
+spec:
+  metrics:
+    - name: req-rate
+      interval: 60s
+      count: 3
+      successCondition: result[0] > 0
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.observability.svc:9090
+          query: sum(rate(predict_requests_total[1m]))
+    - name: latency-p90
+      interval: 60s
+      count: 3
+      failureCondition: result[0] > 1
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.observability.svc:9090
+          query: histogram_quantile(0.90, sum(rate(predict_latency_seconds_bucket[5m])) by (le))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata: { name: predictor-error-rate }
+spec:
+  metrics:
+    - name: error-rate
+      interval: 60s
+      count: 3
+      failureCondition: result[0] > 0.02
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.observability.svc:9090
+          query: |
+            sum(rate(http_requests_total{status!~"2.."}[5m])) / sum(rate(http_requests_total[5m]))
+{{- else }}
+{{- include "tennis-predictor.deployment" . }}
+{{- end }}

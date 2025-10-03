@@ -1,0 +1,11 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: oauth-proxies, namespace: openshift-gitops }
+spec:
+  project: infra
+  destination: { namespace: mlflow, server: https://kubernetes.default.svc }
+  source:
+    repoURL: '{{ REPO_URL }}'
+    targetRevision: HEAD
+    path: manifests/security
+  syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: ["CreateNamespace=true"] }

@@ -1,0 +1,6 @@
+{{- if .Values.installOperator }}
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata: { name: opendatahub-operator-group, namespace: {{ .Values.operator.namespace }} }
+spec: { targetNamespaces: [ {{ .Values.operator.namespace }} ] }
+{{- end }}

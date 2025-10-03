@@ -1,0 +1,29 @@
+rollouts:
+  enabled: true
+  canarySteps:
+    - setWeight: 20
+    - pause: { duration: 60 }
+    - setWeight: 50
+    - pause: { duration: 120 }
+    - setWeight: 100
+image:
+  repository: ghcr.io/yourorg/tennis-predictor
+  tag: latest
+  pullPolicy: IfNotPresent
+replicaCount: 2
+service:
+  port: 8000
+route:
+  enabled: true
+  host: ""
+env:
+  - name: MLFLOW_TRACKING_URI
+    value: http://mlflow.mlflow.svc:5000
+  - name: MODEL_REGISTRY_URI
+    value: s3://mlflow-artifacts
+  - name: S3_ENDPOINT_URL
+    value: http://minio.minio.svc:9000
+  - name: AWS_ACCESS_KEY_ID
+    valueFrom: { secretKeyRef: { name: minio, key: accesskey } }
+  - name: AWS_SECRET_ACCESS_KEY
+    valueFrom: { secretKeyRef: { name: minio, key: secretkey } }

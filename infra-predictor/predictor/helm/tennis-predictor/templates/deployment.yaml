@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: tennis-predictor }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: tennis-predictor } }
+  template:
+    metadata: { labels: { app: tennis-predictor } }
+    spec:
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports: [ { containerPort: {{ .Values.service.port }} } ]

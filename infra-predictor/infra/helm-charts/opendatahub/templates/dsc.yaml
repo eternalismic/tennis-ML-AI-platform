@@ -1,0 +1,10 @@
+{{- if .Values.useDataScienceCluster }}
+apiVersion: datasciencecluster.opendatahub.io/v1
+kind: DataScienceCluster
+metadata: { name: {{ .Values.dsc.name }}, namespace: {{ .Values.dsc.namespace }} }
+spec:
+  components:
+    dashboard: { managementState: {{ .Values.dsc.components.dashboard }} }
+    workbenches: { managementState: {{ .Values.dsc.components.workbenches }} }
+    kserve: { managementState: {{ .Values.dsc.components.kserve }} }
+{{- end }}

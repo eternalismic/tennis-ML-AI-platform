@@ -1,0 +1,13 @@
+name: Helm Lint
+on:
+  pull_request:
+    paths: ["helm-charts/**"]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with: { version: v3.14.4 }
+      - run: helm lint helm-charts/tennis-predictor
+      - run: helm lint helm-charts/opendatahub
