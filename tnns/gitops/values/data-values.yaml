@@ -1,0 +1,22 @@
+predictionApi: { enabled: false }
+agents: { mcp: {enabled: false}, odds: {enabled: false}, exec: {enabled: false} }
+
+mlflow:
+  enabled: true
+  backendUri: "postgresql://mlflow:CHANGEME@pg-ml-rw.tnns-data.svc:5432/mlflow"
+  s3Endpoint: "http://minio.tnns-data.svc:9000"
+  s3Bucket: "mlflow"
+  s3AccessKeySecret: "tnns-s3"
+  s3SecretKeySecret: "tnns-s3"
+  routeHost: "mlflow.apps.prod.example.com"
+
+minio:
+  enabled: true
+  persistence:
+    enabled: true
+    size: "1Ti"
+    storageClass: "fast-ssd"
+  routeHostConsole: "minio-console.apps.prod.example.com"
+  routeHostApi: "minio-api.apps.prod.example.com"
+
+routes: { enabled: true }

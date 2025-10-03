@@ -1,0 +1,21 @@
+predictionApi:
+  enabled: true
+  mlflow:
+    trackingUri: "http://mlflow.tnns-data.svc:5000"
+    modelName: "tennis_win_predictor"
+    modelStage: "Production"
+  s3:
+    endpoint: "http://minio.tnns-data.svc:9000"
+    accessKeySecret: "tnns-s3"
+    secretKeySecret: "tnns-s3"
+
+agents:
+  mcp: { enabled: true, edge: 0.03 }
+  odds: { enabled: true, provider: "BETFAIR" }
+  exec: { enabled: true, mode: "SIM" }
+
+kafka: { bootstrap: "my-cluster-kafka-bootstrap.kafka:9092" }
+
+routes:
+  enabled: true
+  predictionApiHost: "prediction-api.apps.prod.example.com"

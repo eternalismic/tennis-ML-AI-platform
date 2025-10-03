@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tnns-infra-crs
+  namespace: openshift-gitops
+spec:
+  project: tnns
+  source:
+    repoURL: https://github.com/your-org/tnns-cmpt-pwr
+    targetRevision: HEAD
+    path: gitops/infra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tnns-infra
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

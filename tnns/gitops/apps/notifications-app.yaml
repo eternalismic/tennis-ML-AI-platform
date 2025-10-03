@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tnns-notifications
+  namespace: openshift-gitops
+spec:
+  project: tnns
+  source:
+    repoURL: https://github.com/your-org/tnns-cmpt-pwr
+    targetRevision: HEAD
+    path: gitops/notifications
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-gitops
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

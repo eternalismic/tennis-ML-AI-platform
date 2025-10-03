@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tnns-cmpt-pwr
+description: Chart for prediction-api, agents, and optional MLflow/MinIO/Airflow
+type: application
+version: 0.3.0
+appVersion: "0.3.0"

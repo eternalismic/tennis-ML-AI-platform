@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-prediction-api
+  labels:
+    grafana_dashboard: "1"
+data:
+  prediction_api.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Predictions per minute",
+          "targets": [
+            {
+              "expr": "sum(rate(predictions_total[5m]))",
+              "legendFormat": "pred/min",
+              "refId": "A"
+            }
+          ],
+          "id": 1,
+          "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Predictions rate (1m)",
+          "targets": [
+            {
+              "expr": "sum(rate(predictions_total[1m]))",
+              "legendFormat": "pred/s",
+              "refId": "A"
+            }
+          ],
+          "id": 2,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 6
+          }
+        }
+      ],
+      "schemaVersion": 37,
+      "title": "TNNS Prediction API",
+      "version": 1
+    }

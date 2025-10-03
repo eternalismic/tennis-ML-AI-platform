@@ -1,0 +1,19 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: strimzi-og
+  namespace: kafka-operators
+spec:
+  targetNamespaces: [ "kafka-operators" ]
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: strimzi-kafka-operator
+  namespace: kafka-operators
+spec:
+  channel: stable
+  name: strimzi-kafka-operator
+  source: community-operators
+  sourceNamespace: openshift-marketplace
+  installPlanApproval: Automatic

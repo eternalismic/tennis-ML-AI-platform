@@ -1,0 +1,53 @@
+{{- if .Values.predictionApi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prediction-api
+spec:
+  replicas: {{ .Values.predictionApi.replicas }}
+  selector:
+    matchLabels: { app: prediction-api }
+  template:
+    metadata:
+      labels: { app: prediction-api }
+    spec:
+      containers:
+        - name: prediction-api
+          image: {{ default (printf "%s/prediction-api:%s" .Values.image.repository .Values.image.tag) .Values.predictionApi.image | quote }}
+          ports: [{ containerPort: 8000 }]
+          env:
+            - { name: PORT, value: "8000" }
+            - { name: MLFLOW_TRACKING_URI, value: {{ .Values.predictionApi.mlflow.trackingUri | quote }} }
+            - { name: MLFLOW_MODEL_NAME, value: {{ .Values.predictionApi.mlflow.modelName | quote }} }
+            - { name: MLFLOW_MODEL_STAGE, value: {{ .Values.predictionApi.mlflow.modelStage | quote }} }
+            - { name: MLFLOW_S3_ENDPOINT_URL, value: {{ .Values.predictionApi.s3.endpoint | quote }} }
+            {{- if .Values.predictionApi.s3.accessKeySecret }}
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: {{ .Values.predictionApi.s3.accessKeySecret | quote }}, key: accessKey } }
+            {{- end }}
+            {{- if .Values.predictionApi.s3.secretKeySecret }}
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: {{ .Values.predictionApi.s3.secretKeySecret | quote }}, key: secretKey } }
+            {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prediction-api
+  labels: { app: prediction-api }
+spec:
+  selector: { app: prediction-api }
+  ports:
+    - { name: http, port: 8000, targetPort: 8000 }
+{{- if and .Values.routes.enabled .Values.routes.predictionApiHost }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: prediction-api
+spec:
+  host: {{ .Values.routes.predictionApiHost }}
+  to: { kind: Service, name: prediction-api }
+  tls: { termination: edge, insecureEdgeTerminationPolicy: Redirect }
+{{- end }}
+{{- end }}

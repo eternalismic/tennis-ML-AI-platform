@@ -1,0 +1,37 @@
+{{- if .Values.mlflow.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: mlflow }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: mlflow } }
+  template:
+    metadata: { labels: { app: mlflow } }
+    spec:
+      containers:
+        - name: mlflow
+          image: {{ .Values.mlflow.image | quote }}
+          args: ["mlflow","server","--host","0.0.0.0","--port","{{ .Values.mlflow.service.port }}","--backend-store-uri","{{ .Values.mlflow.backendUri }}","--default-artifact-root","s3://{{ .Values.mlflow.s3Bucket }}"]
+          ports: [{ containerPort: {{ .Values.mlflow.service.port }} }]
+          env:
+            - { name: MLFLOW_S3_ENDPOINT_URL, value: {{ .Values.mlflow.s3Endpoint | quote }} }
+            - { name: AWS_ACCESS_KEY_ID, valueFrom: { secretKeyRef: { name: {{ .Values.mlflow.s3AccessKeySecret | quote }}, key: accessKey } } }
+            - { name: AWS_SECRET_ACCESS_KEY, valueFrom: { secretKeyRef: { name: {{ .Values.mlflow.s3SecretKeySecret | quote }}, key: secretKey } } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: mlflow }
+spec:
+  selector: { app: mlflow }
+  ports: [{ port: {{ .Values.mlflow.service.port }}, targetPort: {{ .Values.mlflow.service.port }} }]
+{{- if and .Values.routes.enabled .Values.mlflow.routeHost }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata: { name: mlflow }
+spec:
+  host: {{ .Values.mlflow.routeHost }}
+  to: { kind: Service, name: mlflow }
+  tls: { termination: edge, insecureEdgeTerminationPolicy: Redirect }
+{{- end }}
+{{- end }}

@@ -1,0 +1,79 @@
+image:
+  repository: ghcr.io/your-org/tnns
+  tag: latest
+
+predictionApi:
+  enabled: true
+  image: ""
+  replicas: 1
+  service:
+    port: 8000
+  mlflow:
+    trackingUri: ""
+    modelName: ""
+    modelStage: "Production"
+  s3:
+    endpoint: ""
+    accessKeySecret: ""
+    secretKeySecret: ""
+
+agents:
+  mcp:
+    enabled: true
+    image: ""
+    edge: 0.03
+  odds:
+    enabled: true
+    image: ""
+    provider: "MOCK"
+  exec:
+    enabled: true
+    image: ""
+    mode: "SIM"
+
+kafka:
+  bootstrap: "kafka:9092"
+
+routes:
+  enabled: true
+  predictionApiHost: ""
+
+mlflow:
+  enabled: true
+  image: "bitnami/mlflow:2"
+  backendUri: ""
+  s3Endpoint: ""
+  s3Bucket: "mlflow"
+  s3AccessKeySecret: ""
+  s3SecretKeySecret: ""
+  service:
+    port: 5000
+  routeHost: ""
+
+minio:
+  enabled: true
+  image: "minio/minio:latest"
+  accessKeySecret: ""
+  secretKeySecret: ""
+  persistence:
+    enabled: false
+    size: "20Gi"
+    storageClass: ""
+  service:
+    apiPort: 9000
+    consolePort: 9001
+  routeHostConsole: ""
+  routeHostApi: ""
+
+airflow:
+  enabled: true
+  image: "apache/airflow:2.8.3"
+  service:
+    port: 8080
+  routeHost: ""
+
+strimzi:
+  enabled: true
+
+cnpg:
+  enabled: true

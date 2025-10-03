@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tnns-data
+  namespace: openshift-gitops
+spec:
+  project: tnns
+  source:
+    repoURL: https://github.com/your-org/tnns-cmpt-pwr
+    targetRevision: HEAD
+    path: charts/tnns-cmpt-pwr
+    helm:
+      valueFiles: [ "../../gitops/values/data-values.yaml" ]
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tnns-data
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

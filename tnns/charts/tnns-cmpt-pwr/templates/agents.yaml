@@ -1,0 +1,53 @@
+{{- if .Values.agents.mcp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: mcp-agent }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: mcp-agent } }
+  template:
+    metadata: { labels: { app: mcp-agent } }
+    spec:
+      containers:
+        - name: mcp
+          image: {{ default (printf "%s/mcp-agent:%s" .Values.image.repository .Values.image.tag) .Values.agents.mcp.image | quote }}
+          env:
+            - { name: KAFKA_BOOTSTRAP, value: {{ .Values.kafka.bootstrap | quote }} }
+            - { name: MCP_EDGE, value: {{ .Values.agents.mcp.edge | toString | quote }} }
+{{- end }}
+---
+{{- if .Values.agents.odds.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: odds-ingestion }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: odds-ingestion } }
+  template:
+    metadata: { labels: { app: odds-ingestion } }
+    spec:
+      containers:
+        - name: odds
+          image: {{ default (printf "%s/odds-ingestion:%s" .Values.image.repository .Values.image.tag) .Values.agents.odds.image | quote }}
+          env:
+            - { name: KAFKA_BOOTSTRAP, value: {{ .Values.kafka.bootstrap | quote }} }
+            - { name: ODDS_PROVIDER, value: {{ .Values.agents.odds.provider | quote }} }
+{{- end }}
+---
+{{- if .Values.agents.exec.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: betting-execution }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: betting-execution } }
+  template:
+    metadata: { labels: { app: betting-execution } }
+    spec:
+      containers:
+        - name: exec
+          image: {{ default (printf "%s/betting-execution:%s" .Values.image.repository .Values.image.tag) .Values.agents.exec.image | quote }}
+          env:
+            - { name: KAFKA_BOOTSTRAP, value: {{ .Values.kafka.bootstrap | quote }} }
+            - { name: EXECUTION_MODE, value: {{ .Values.agents.exec.mode | quote }} }
+{{- end }}

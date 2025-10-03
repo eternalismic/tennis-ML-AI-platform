@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tnns-operators
+  namespace: openshift-gitops
+spec:
+  project: tnns
+  source:
+    repoURL: https://github.com/your-org/tnns-cmpt-pwr
+    targetRevision: HEAD
+    path: gitops/operators
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: operators
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

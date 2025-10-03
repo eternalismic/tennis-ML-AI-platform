@@ -1,0 +1,30 @@
+routes:
+  enabled: true
+  predictionApiHost: "prediction-api.apps-crc.testing"
+
+minio:
+  enabled: true
+  persistence:
+    enabled: false
+  routeHostConsole: "minio-console.apps-crc.testing"
+  routeHostApi: "minio-api.apps-crc.testing"
+
+mlflow:
+  enabled: true
+  backendUri: "postgresql://user:pass@pg-ml-rw.tnns-dev.svc:5432/mlflow"
+  s3Endpoint: "http://minio.tnns-dev.svc:9000"
+  s3AccessKeySecret: "tnns-s3"
+  s3SecretKeySecret: "tnns-s3"
+  routeHost: "mlflow.apps-crc.testing"
+
+airflow:
+  enabled: true
+  routeHost: "airflow.apps-crc.testing"
+
+kafka:
+  bootstrap: "my-cluster-kafka-bootstrap.kafka:9092"
+
+strimzi:
+  enabled: true
+cnpg:
+  enabled: true
