@@ -1,5 +1,5 @@
-
 name: Build & Publish Docs (with CNAME)
+
 on:
   workflow_dispatch:
   push:
@@ -8,21 +8,42 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - '.github/workflows/docs-with-cname.yml'
+
+permissions:
+  contents: write   # required to push to gh-pages with GITHUB_TOKEN
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
           cache-dependency-path: docs/requirements-docs.txt
-      - run: python -m pip install --upgrade pip
-      - run: pip install -r docs/requirements-docs.txt
-      - run: mkdocs build --strict
-      - uses: peaceiris/actions-gh-pages@v3
+
+      - name: Install docs dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r docs/requirements-docs.txt
+
+      # Fast fail if the plugin isn't actually installed
+      - name: Verify mkdocs-jupyter installed
+        run: |
+          python - << 'PY'
+          import importlib.util
+          assert importlib.util.find_spec('mkdocs_jupyter'), "mkdocs_jupyter not found"
+          print("mkdocs_jupyter OK")
+          PY
+
+      - name: Build site
+        run: mkdocs build --strict
+
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
-          cname: ${{ vars.DOCS_CNAME }}
+          cname: ${{ vars.DOCS_CNAME }}   # <-- remove anything after this
