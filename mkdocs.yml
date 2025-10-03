@@ -28,10 +28,11 @@ markdown_extensions:
   - attr_list
   - tables
 extra_css:
-  - docs/stylesheets/extra.css
+  - stylesheets/extra.css
 nav:
   - Home: index.md
   - Architecture: architecture.md
+  - Architecture (Advanced): architecture-advanced.md
   - UI & Gateway: ui.md
   - MCP & Strategy: mcp.md
   - ML & Prediction:
@@ -40,6 +41,8 @@ nav:
     - calibration-evaluation.md
     - calibration-demo.md
     - calibration-comparison.md
+    - roc-pr-comparison.md
+    - threshold-sensitivity.md
   - Validation & Safety:
     - simulation-validation.md
     - risk-controls.md
@@ -54,5 +57,11 @@ nav:
     - openshift-uwm.md
   - Diagrams: diagrams.md
   - Publishing Docs: github-pages.md
+  - Notebooks:
+    - notebooks/backtest.ipynb
 plugins:
   - search
+  - mkdocs-jupyter:
+      execute: true
+      allow_errors: false
+      include_source: true

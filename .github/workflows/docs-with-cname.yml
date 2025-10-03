@@ -1,0 +1,22 @@
+
+name: Build & Publish Docs (with CNAME)
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths: [ 'docs/**', 'mkdocs.yml', '.github/workflows/docs-with-cname.yml' ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install mkdocs mkdocs-material pymdown-extensions mkdocs-jupyter jupyter nbconvert ipykernel
+      - run: mkdocs build --strict
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          cname: ${{ vars.DOCS_CNAME }}
