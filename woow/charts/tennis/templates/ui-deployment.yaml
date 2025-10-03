@@ -1,0 +1,32 @@
+
+{{- if .Values.ui.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tennis.fullname" . }}-ui
+  labels: { app.kubernetes.io/name: {{ include "tennis.name" . }}, app.kubernetes.io/component: ui }
+spec:
+  replicas: {{ .Values.ui.replicas }}
+  selector:
+    matchLabels: { app.kubernetes.io/name: {{ include "tennis.name" . }}, app.kubernetes.io/component: ui }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: {{ include "tennis.name" . }}, app.kubernetes.io/component: ui }
+    spec:
+      containers:
+        - name: ui
+          image: "{{ .Values.ui.frontend.image.repository }}:{{ .Values.ui.frontend.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: NEXT_PUBLIC_SSE_URL, value: "/api/sse" }
+            - { name: NEXT_PUBLIC_GATEWAY_BASE, value: "http://{{ include "tennis.fullname" . }}-agent.{{ .Release.Namespace }}.svc.cluster.local:8080" }
+            - { name: GATEWAY_BASE, value: "http://{{ include "tennis.fullname" . }}-agent.{{ .Release.Namespace }}.svc.cluster.local:8080" }
+            - { name: OIDC_ISSUER_URL, value: "{{ .Values.ui.oidc.issuer }}" }
+            - name: OIDC_CLIENT_ID
+              valueFrom: { secretKeyRef: { name: {{ .Values.ui.secretsRef }}, key: oidc_client_id } }
+            - name: OIDC_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: {{ .Values.ui.secretsRef }}, key: oidc_client_secret } }
+            - { name: AUTH_PROVIDER, value: "{{ .Values.ui.oidc.provider }}" }
+          ports:
+            - { containerPort: 3000, name: http }
+{{- end }}

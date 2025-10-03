@@ -32,3 +32,29 @@ agent:
     release: prometheus
     dailyStopLoss: 100
     maxPendingExposure: 1000
+
+ui:
+  enabled: true
+  replicas: 1
+  secretsRef: tennis-ui-secrets
+  frontend:
+    image:
+      repository: ghcr.io/your-org/tennis-ui
+      tag: latest
+  gateway:
+    image:
+      repository: ghcr.io/your-org/tennis-ui-gateway
+      tag: latest
+    promUrl: "http://prometheus-k8s.monitoring:9090"
+    oidc:
+      issuer: ""    # e.g., https://dev-abc123.us.auth0.com or https://keycloak.example.com/realms/tennis
+      audience: ""  # API audience expected in access_token (Auth0) or client_id (Keycloak)
+      jwksUrl: ""   # optional override of JWKS URL
+  oidc:
+    provider: "auth0" # or "keycloak"
+    issuer: ""        # same as gateway.oidc.issuer
+  ingress:
+    enabled: false
+    className: nginx
+    host: mcp.example.com
+    tlsSecretName: mcp-tls

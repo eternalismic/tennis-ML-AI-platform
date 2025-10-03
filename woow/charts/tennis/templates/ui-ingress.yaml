@@ -1,0 +1,24 @@
+
+{{- if and .Values.ui.enabled .Values.ui.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "tennis.fullname" . }}-ui
+  annotations:
+    {{- range $k,$v := .Values.ui.ingress.annotations }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ui.ingress.className | quote }}
+  rules:
+    - host: {{ .Values.ui.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: {{ include "tennis.fullname" . }}-ui, port: { number: 80 } }
+  tls:
+    - hosts: [ {{ .Values.ui.ingress.host | quote }} ]
+      secretName: {{ .Values.ui.ingress.tlsSecretName | quote }}
+{{- end }}

@@ -38,15 +38,28 @@ spec:
             - { name: DAILY_STOP_LOSS, value: "{{ .Values.agent.dailyStopLoss | quote }}" }
             - { name: DAILY_TAKE_PROFIT, value: "{{ .Values.agent.dailyTakeProfit | quote }}" }
             - { name: DAILY_MAX_BETS, value: "{{ .Values.agent.dailyMaxBets | quote }}" }
+            - { name: AGENT_EVENTS_PATH, value: "/events/events.jsonl" }
           volumeMounts:
-            - name: certs
-              mountPath: /certs
-              readOnly: true
+            - { name: certs, mountPath: /certs, readOnly: true }
+            - { name: events, mountPath: /events }
           ports:
-            - containerPort: {{ .Values.agent.metricsPort }}
-              name: metrics
+            - { containerPort: {{ .Values.agent.metricsPort }}, name: metrics }
+        - name: ui-gateway
+          image: "{{ .Values.ui.gateway.image.repository }}:{{ .Values.ui.gateway.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: AGENT_EVENTS_PATH, value: "/events/events.jsonl" }
+            - { name: PROM_URL, value: "{{ .Values.ui.gateway.promUrl }}" }
+            - { name: OIDC_ISSUER_URL, value: "{{ .Values.ui.gateway.oidc.issuer }}" }
+            - { name: OIDC_AUDIENCE, value: "{{ .Values.ui.gateway.oidc.audience }}" }
+            - { name: OIDC_JWKS_URL, value: "{{ .Values.ui.gateway.oidc.jwksUrl }}" }
+          volumeMounts:
+            - { name: events, mountPath: /events }
+          ports:
+            - { containerPort: 8080, name: sse }
       volumes:
         - name: certs
-          secret:
-            secretName: {{ .Values.agent.certSecretRef }}
+          secret: { secretName: {{ .Values.agent.certSecretRef }} }
+        - name: events
+          emptyDir: {}
 {{- end }}

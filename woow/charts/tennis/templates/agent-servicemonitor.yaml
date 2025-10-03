@@ -4,15 +4,11 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "tennis.fullname" . }}-agent
-  labels:
-    release: {{ .Values.agent.serviceMonitor.release | quote }}
+  labels: { release: {{ .Values.agent.serviceMonitor.release | quote }} }
 spec:
   namespaceSelector: {}
   selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ include "tennis.name" . }}
-      app.kubernetes.io/component: agent
+    matchLabels: { app.kubernetes.io/name: {{ include "tennis.name" . }}, app.kubernetes.io/component: agent }
   endpoints:
-    - port: metrics
-      interval: 15s
+    - { port: metrics, interval: 15s }
 {{- end }}
