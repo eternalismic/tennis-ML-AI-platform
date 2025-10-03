@@ -1,0 +1,18 @@
+
+{{- if .Values.agent.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tennis.fullname" . }}-agent
+  labels:
+    app.kubernetes.io/name: {{ include "tennis.name" . }}
+    app.kubernetes.io/component: agent
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "tennis.name" . }}
+    app.kubernetes.io/component: agent
+  ports:
+    - name: metrics
+      port: {{ .Values.agent.metricsPort }}
+      targetPort: metrics
+{{- end }}

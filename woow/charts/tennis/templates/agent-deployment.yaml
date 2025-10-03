@@ -1,0 +1,52 @@
+
+{{- if .Values.agent.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tennis.fullname" . }}-agent
+  labels: { app.kubernetes.io/name: {{ include "tennis.name" . }}, app.kubernetes.io/component: agent }
+spec:
+  replicas: {{ .Values.agent.replicas }}
+  selector:
+    matchLabels: { app.kubernetes.io/name: {{ include "tennis.name" . }}, app.kubernetes.io/component: agent }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: {{ include "tennis.name" . }}, app.kubernetes.io/component: agent }
+    spec:
+      containers:
+        - name: agent
+          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - { name: AGENT_MODE, value: "{{ .Values.agent.mode }}" }
+            - { name: AGENT_LOG_LEVEL, value: "{{ .Values.agent.logLevel }}" }
+            - { name: EVENT_TYPE_IDS, value: "{{ .Values.agent.eventTypeIds }}" }
+            - { name: MARKET_TYPES, value: "{{ .Values.agent.marketTypes }}" }
+            - { name: MCP_EDGE_THRESHOLD, value: "{{ .Values.agent.edgeThreshold | quote }}" }
+            - { name: MCP_MAX_RISK_PCT, value: "{{ .Values.agent.maxRiskPct | quote }}" }
+            - { name: MCP_BANKROLL, value: "{{ .Values.agent.bankroll | quote }}" }
+            - { name: MCP_MIN_ODDS, value: "{{ .Values.agent.minOdds | quote }}" }
+            - { name: MCP_MAX_ODDS, value: "{{ .Values.agent.maxOdds | quote }}" }
+            - { name: INPLAY_ONLY, value: "{{ .Values.agent.inplayOnly | quote }}" }
+            - { name: PREDICTION_API_URL, value: "{{ .Values.agent.predictionApiUrl }}" }
+            - { name: PREDICTION_API_KEY, valueFrom: { secretKeyRef: { name: {{ .Values.agent.secretsRef }}, key: prediction_api_key } } }
+            - { name: BF_USERNAME, valueFrom: { secretKeyRef: { name: {{ .Values.agent.secretsRef }}, key: bf_username } } }
+            - { name: BF_PASSWORD, valueFrom: { secretKeyRef: { name: {{ .Values.agent.secretsRef }}, key: bf_password } } }
+            - { name: BF_APP_KEY, valueFrom: { secretKeyRef: { name: {{ .Values.agent.secretsRef }}, key: bf_app_key } } }
+            - { name: BF_CERTS_DIR, value: "/certs" }
+            - { name: METRICS_PORT, value: "{{ .Values.agent.metricsPort | quote }}" }
+            - { name: DAILY_STOP_LOSS, value: "{{ .Values.agent.dailyStopLoss | quote }}" }
+            - { name: DAILY_TAKE_PROFIT, value: "{{ .Values.agent.dailyTakeProfit | quote }}" }
+            - { name: DAILY_MAX_BETS, value: "{{ .Values.agent.dailyMaxBets | quote }}" }
+          volumeMounts:
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+          ports:
+            - containerPort: {{ .Values.agent.metricsPort }}
+              name: metrics
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ .Values.agent.certSecretRef }}
+{{- end }}

@@ -1,0 +1,13 @@
+
+FROM python:3.11-slim
+ARG UID=10001
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY requirements_agent.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+COPY agents /app/agents
+ENV PYTHONPATH=/app
+ENV AGENT_MODE=SIM METRICS_PORT=9100
+USER ${UID}
+ENTRYPOINT ["python","-m","agents.betfair_agent.run_agent"]

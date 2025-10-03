@@ -1,0 +1,35 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tennis-agent-prod
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tennis
+  source:
+    repoURL: https://github.com/your-org/woow.git
+    targetRevision: main
+    path: charts/tennis
+    helm:
+      valuesObject:
+        agent:
+          enabled: true
+          mode: REAL
+          logLevel: INFO
+          serviceMonitor:
+            enabled: true
+            release: prometheus
+          grafanaDashboard:
+            enabled: true
+          alerts:
+            enabled: true
+            release: prometheus
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

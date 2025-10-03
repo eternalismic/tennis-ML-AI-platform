@@ -1,0 +1,34 @@
+
+agent:
+  enabled: true
+  replicas: 1
+  image:
+    repository: ghcr.io/your-org/tennis-agent
+    tag: latest
+  mode: SIM
+  logLevel: INFO
+  eventTypeIds: "2"
+  marketTypes: "MATCH_ODDS"
+  edgeThreshold: 0.05
+  maxRiskPct: 0.01
+  bankroll: 1000.0
+  minOdds: 1.01
+  maxOdds: 1000.0
+  inplayOnly: false
+  predictionApiUrl: ""
+  metricsPort: 9100
+  secretsRef: tennis-agent-secrets
+  certSecretRef: betfair-cert-secret
+  dailyStopLoss: 100.0
+  dailyTakeProfit: 1000.0
+  dailyMaxBets: 200
+  serviceMonitor:
+    enabled: true
+    release: prometheus
+  grafanaDashboard:
+    enabled: true
+  alerts:
+    enabled: true
+    release: prometheus
+    dailyStopLoss: 100
+    maxPendingExposure: 1000

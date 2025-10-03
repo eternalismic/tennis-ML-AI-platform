@@ -1,0 +1,32 @@
+
+{{- if and .Values.agent.enabled .Values.agent.alerts.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "tennis.fullname" . }}-agent-alerts
+  labels:
+    release: {{ .Values.agent.alerts.release | quote }}
+spec:
+  groups:
+    - name: tennis-agent.slo
+      rules:
+        - alert: AgentDailyStopLossBreached
+          expr: daily_pnl <= -{{ .Values.agent.alerts.dailyStopLoss | default 100 }}
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "Daily stop-loss breached"
+            description: "daily_pnl <= -{{ .Values.agent.alerts.dailyStopLoss }} over 5m"
+        - alert: AgentNoData
+          expr: rate(mcp_evaluations_total[15m]) == 0
+          for: 15m
+          labels: { severity: warning }
+          annotations:
+            summary: "No MCP evaluations for 15 minutes"
+        - alert: AgentHighExposure
+          expr: pending_exposure > {{ .Values.agent.alerts.maxPendingExposure | default 1000 }}
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "Pending exposure above threshold"
+{{- end }}

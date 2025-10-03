@@ -1,0 +1,12 @@
+
+{{- if .Values.agent.grafanaDashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tennis.fullname" . }}-agent-dashboard
+  labels:
+    grafana_dashboard: "1"
+data:
+  agent-dashboard.json: |
+{{ (.Files.Get "grafana/dashboards/agent.json") | indent 4 }}
+{{- end }}
