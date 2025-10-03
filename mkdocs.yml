@@ -28,30 +28,40 @@ markdown_extensions:
   - attr_list
   - tables
 extra_css:
-  - docs/stylesheets/extra.css
+  - stylesheets/extra.css
 nav:
   - Home: index.md
   - Architecture: architecture.md
+  - Architecture (Advanced): architecture-advanced.md
   - UI & Gateway: ui.md
   - MCP & Strategy: mcp.md
   - ML & Prediction:
     - ml-basics.md
     - prediction-modeling.md
     - calibration-evaluation.md
+    - calibration-demo.md
+    - calibration-comparison.md
+    - roc-pr-comparison.md
+    - threshold-sensitivity.md
   - Validation & Safety:
     - simulation-validation.md
     - risk-controls.md
     - security-auth.md
+    - backtest-synthetic.md
   - Runbooks:
     - runbooks/sim-shadow.md
     - runbooks/prod-cutover.md
   - Helm & OpenShift:
     - helm.md
     - openshift.md
+    - openshift-uwm.md
   - Diagrams: diagrams.md
+  - Publishing Docs: github-pages.md
+  - Notebooks:
+    - notebooks/backtest.ipynb
 plugins:
   - search
-  - Publishing Docs: github-pages.md
-  - ML & Prediction:
-  - calibration-demo.md
-  - OpenShift UWM: openshift-uwm.md
+  - mkdocs-jupyter:
+      execute: true
+      allow_errors: false
+      include_source: true
