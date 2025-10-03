@@ -1,0 +1,27 @@
+
+## MCP State Machine
+```mermaid
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> Evaluating: odds_update
+  Evaluating --> NoBet: edge<threshold
+  Evaluating --> ReadyToBet: edge>=threshold & risk_ok
+  ReadyToBet --> PlacingOrder: create_limit_order
+  PlacingOrder --> Monitoring: order_submitted
+  Monitoring --> Monitoring: partial_fill / odds_update
+  Monitoring --> Settled: match_end
+  Monitoring --> Idle: stop_loss | take_profit
+  Settled --> Idle
+  NoBet --> Idle
+```
+
+## Calibration Flow
+```mermaid
+flowchart TD
+  A["Predicted probabilities"] --> B["Bin into deciles"]
+  B --> C["Observed frequency per bin"]
+  C --> D["Reliability curve"]
+  A --> E["Calibration method (Platt / isotonic)"]
+  E --> F["Calibrated probabilities"]
+  F --> B
+```
